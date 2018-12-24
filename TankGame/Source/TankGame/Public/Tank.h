@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "Tank.generated.h"
-
+class AProjectile;
 UCLASS()
 class TANKGAME_API ATank : public APawn
 {
@@ -19,6 +19,10 @@ public:
 	void SetBarrelReference(UTankBarrel* BarrelToSet);
 	UFUNCTION(BlueprintCallable, Category = Setup)
 	void SetTurretReference(UTurret* TurretToSet);
+	UFUNCTION(BlueprintCallable, Category = Setup)
+	void Fire();
+	UPROPERTY(EditAnywhere,Category = Setup)
+	TSubclassOf<AProjectile> ProjectileBluePrint;
 protected:
 	UTankAimingComponent* TankAimingComponent = nullptr;
 	// Called when the game starts or when spawned
@@ -33,7 +37,8 @@ public:
 
 private:
 	UPROPERTY(EditAnywhere, Category = Firing)
-		float LaunchSpeed = 1000000; //1000 m/s
+	float LaunchSpeed = 4000; 
+	UTankBarrel* Barrel = nullptr;
 
 	
 };

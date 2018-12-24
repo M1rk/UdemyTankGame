@@ -5,8 +5,8 @@
 
 
 
-void UTankBarrel::Elevate(float RelativeSpeed)
-{
+void UTankBarrel::Elevate(float RelativeSpeed) // RelativeSpeed - вообще-то является относительным направлением подъема,а не скоростью
+{                                               //это просто разница, которая клампится в пределы -1 / 1 и оттуда узнаем направление
 	RelativeSpeed = FMath::Clamp<float>(RelativeSpeed, -1, 1);
 	auto ElevationChange = RelativeSpeed * MaxDegreesPerSecond * GetWorld()->DeltaTimeSeconds;
 	auto RawNewElevation = RelativeRotation.Pitch + ElevationChange;

@@ -41,11 +41,11 @@ void UTankAimingComponent::AimAt(FVector HitLocation,float LaunchSpeed)
 		return;
 	}
 	
-	FVector StartLocation = Barrel->GetSocketLocation(FName("ProjectileSpawnLocation"));
-	FVector Calculate = Barrel->GetSocketLocation(FName("CalculatePosition"));
+	FVector StartLocation = Barrel->GetSocketLocation(FName("ProjectileSpawnLocation"));//позиция сокета на конце пушки
+	
 	bool bHaveAimSolution = UGameplayStatics::SuggestProjectileVelocity(
 		this,
-		OutLaunchVelocity,
+		OutLaunchVelocity,// OUT parameter даёт нам выходной вектор
 		StartLocation,
 		HitLocation, 
 		LaunchSpeed,
@@ -61,10 +61,9 @@ void UTankAimingComponent::AimAt(FVector HitLocation,float LaunchSpeed)
 	if (bHaveAimSolution) 
 	{
 	auto AimDirection = OutLaunchVelocity.GetSafeNormal();
-	MoveBarrelTowards(AimDirection);
-	MoveTurretTowards(AimDirection);
-	auto Time = GetWorld()->GetTimeSeconds();
-	UE_LOG(LogTemp, Warning, TEXT("%f: Solution was found"),Time )
+	MoveBarrelTowards(AimDirection); //двигаем пушку по вертикали так, чтобы при выстреле с заданными параметрами снаряд попал туда, куда указывает прицел
+	MoveTurretTowards(AimDirection);//двигаем башню по горизонтали так, чтобы при выстреле с заданными параметрами снаряд попал туда, куда указывает прицел
+	
 	}
 	else 
 	{
@@ -80,22 +79,22 @@ void UTankAimingComponent::SetBarrelReference(UTankBarrel * BarrelToSet)
 }
 void UTankAimingComponent::SetTurretReference(UTurret * TurretToSet)
 {
-	this->Turret = TurretToSet;
+	Turret = TurretToSet;
 }
-void UTankAimingComponent::MoveBarrelTowards(FVector AimDirection)
+void UTankAimingComponent::MoveBarrelTowards(FVector AimDirection)// поднимаем/опускаем ствол пушки
 {
-	auto BarrelRotator = Barrel->GetForwardVector().Rotation();
-	auto AimAsRotator = AimDirection.Rotation();
-	auto DeltaRotator = AimAsRotator - BarrelRotator;
+	auto BarrelRotator = Barrel->GetForwardVector().Rotation();//куда смотрит пушка
+	auto AimAsRotator = AimDirection.Rotation();//куда мы хотим попасть после выстрела
+	auto DeltaRotator = AimAsRotator - BarrelRotator;//разница, которую передаём в метод Elevate (-1 или +1 после Clamp)
 	
 	Barrel->Elevate(DeltaRotator.Pitch);
 	
 }
 
-void UTankAimingComponent::MoveTurretTowards(FVector AimDirection)
+void UTankAimingComponent::MoveTurretTowards(FVector AimDirection) //вращаем башню
 {
-	auto BarrelRotator = Barrel->GetForwardVector().Rotation();
-	auto AimAsRotator = AimDirection.Rotation();
-	auto DeltaRotator = AimAsRotator - BarrelRotator;
+	auto BarrelRotator = Barrel->GetForwardVector().Rotation(); //куда смотрит пушка
+	auto AimAsRotator = AimDirection.Rotation(); //куда мы хотим попасть после выстрела
+	auto DeltaRotator = AimAsRotator - BarrelRotator; //разница, которую передаём в метод Turn (-1 или +1 после Clamp)
 	Turret->Turn(DeltaRotator.Yaw);
 }
