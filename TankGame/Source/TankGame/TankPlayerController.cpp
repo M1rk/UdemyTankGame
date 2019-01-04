@@ -74,7 +74,8 @@ bool ATankPlayerController::GetLookDirection(FVector2D ScreenLocation, FVector &
 FHitResult ATankPlayerController::GetLookVectorHitLocation(FVector CameraWorldLocation,FVector LookDirection) 
 {
 		FHitResult HitResult(ForceInit);
-		FCollisionQueryParams Params= FCollisionQueryParams(FName(TEXT("AimRay")), true, this);
+		FCollisionQueryParams Params= FCollisionQueryParams(FName(TEXT("AimRay")), true, GetControlledTank()); //GetControlledTank ползволяет игнорить танк при прицеливании
+		//Params.AddIgnoredActor(GetControlledTank());  //так тоже можно игнорировать
 		GetWorld()->LineTraceSingleByChannel(HitResult, CameraWorldLocation, CameraWorldLocation + LookDirection * 150000, ECC_Visibility, Params);
 		return HitResult;
 }

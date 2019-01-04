@@ -35,5 +35,5 @@ private:
 	UTurret* Turret = nullptr;
 	void MoveBarrelTowards(FVector AimDirection);
 	void MoveTurretTowards(FVector AimDirection);
-	
+	TArray<AActor*>ArrayToIgnore;
 };

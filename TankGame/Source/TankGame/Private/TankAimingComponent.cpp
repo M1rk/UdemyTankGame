@@ -13,6 +13,7 @@ UTankAimingComponent::UTankAimingComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 	OutLaunchVelocity = FVector(0, 0, 0);
 	// ...
+	ArrayToIgnore.Add(GetOwner());
 }
 
 
@@ -47,17 +48,18 @@ void UTankAimingComponent::AimAt(FVector HitLocation,float LaunchSpeed)
 		this,
 		OutLaunchVelocity,// OUT parameter даёт нам выходной вектор
 		StartLocation,
-		HitLocation, 
+		HitLocation,
 		LaunchSpeed,
 		false,
 		0,
 		0,
 		ESuggestProjVelocityTraceOption::DoNotTrace,
 		FCollisionResponseParams::DefaultResponseParam,
-		TArray<AActor*>(),
+		ArrayToIgnore,
 		false
-		
-		);
+
+	);
+	//TArray<AActor*>()
 	if (bHaveAimSolution) 
 	{
 	auto AimDirection = OutLaunchVelocity.GetSafeNormal();

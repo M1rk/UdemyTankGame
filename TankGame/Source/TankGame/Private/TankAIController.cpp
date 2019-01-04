@@ -13,30 +13,18 @@ void ATankAIController::BeginPlay()
 void ATankAIController::Tick(float DeltaTime) 
 {
 	Super::Tick(DeltaTime);
-	if (GetPlayerTank()) 
+	auto PlayerTank = Cast<ATank>(GetWorld()->GetFirstPlayerController()->GetPawn()); //танк игрока
+	auto ControlledTank = Cast<ATank>(GetPawn()); //танк под контролем ИИ
+	
+	if (PlayerTank) 
 	{
 		//Move toward the player
-		//...
+		MoveToActor(PlayerTank, 300);
 		//Aim toward the player
-		GetControlledTank()->AimAt(GetPlayerTank()->GetActorLocation());
-		
+		ControlledTank->AimAt(PlayerTank->GetActorLocation());
 		//Fire if ready
+		ControlledTank->Fire();
 	}
-	
 }
-ATank* ATankAIController::GetControlledTank() const
-{
-	return Cast<ATank>(GetPawn());
-}
-ATank* ATankAIController::GetPlayerTank() const
-{
-	auto PlayerPawn = GetWorld()->GetFirstPlayerController()->GetPawn();
-	if (!PlayerPawn) 
-	{
-		//UE_LOG(LogTemp, Warning, TEXT("PlayerPawn doesn't exist"));
-		return nullptr;
 
-	}
-	//UE_LOG(LogTemp, Warning, TEXT("We've got PlayerPawn from TankAIController: %s"),*PlayerPawn->GetName());
-	return Cast<ATank>(PlayerPawn);
-}
+
