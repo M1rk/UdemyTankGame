@@ -22,7 +22,7 @@ UTankAimingComponent::UTankAimingComponent()
 void UTankAimingComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
+	LastFireTime = FPlatformTime::Seconds();
 	// ...
 	
 }
@@ -32,7 +32,10 @@ void UTankAimingComponent::BeginPlay()
 void UTankAimingComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
+	if(FPlatformTime::Seconds() - LastFireTime > ReloadTimeInSeconds)
+	{
+		Firingstate = EFiringState::Locked;
+	}
 	// ...
 }
 void UTankAimingComponent::AimAt(FVector HitLocation) 
@@ -43,7 +46,7 @@ void UTankAimingComponent::AimAt(FVector HitLocation)
 		UE_LOG(LogTemp, Warning, TEXT("Barrel was not found"));
 		return;
 	}
-	FVector StartLocation = Barrel->GetSocketLocation(FName("ProjectileSpawnLocation"));//позиция сокета на конце пушки
+	FVector StartLocation = Barrel->GetSocketLocation(FName("Projectile"));//позиция сокета на конце пушки
 	
 	bool bHaveAimSolution = UGameplayStatics::SuggestProjectileVelocity(
 		this,
@@ -110,16 +113,17 @@ void UTankAimingComponent::MoveTurretTowards(FVector AimDirection) //вращаем баш
 void UTankAimingComponent::Fire() 
 {
 	if (!ensure(Barrel&&ProjectileBluePrint)) { return; }
-	bool isReloaded = (FPlatformTime::Seconds() - LastFireTime) > ReloadTimeInSeconds; //текущее время с начала игры минус время последнего выстрела
-																					   //сравниваем со временем перезарядки
-	if (isReloaded)
+	 //текущее время с начала игры минус время последнего выстрела
+	 //сравниваем со временем перезарядки
+	if (Firingstate != EFiringState::Reloading)
 	{
 		auto Projectile = GetWorld()->SpawnActor<AProjectile>(
 			ProjectileBluePrint,
 			Barrel->GetSocketLocation(FName("Projectile")),
 			Barrel->GetSocketRotation(FName("Projectile")));
-		Projectile->LaunchProjectile(10000);
+		Projectile->LaunchProjectile(LaunchSpeed);
 		LastFireTime = FPlatformTime::Seconds();
+		Firingstate = EFiringState::Reloading;
 
 	}
 }
