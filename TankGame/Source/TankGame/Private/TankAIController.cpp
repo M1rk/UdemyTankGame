@@ -16,7 +16,7 @@ void ATankAIController::Tick(float DeltaTime)
 	auto PlayerTank = Cast<ATank>(GetWorld()->GetFirstPlayerController()->GetPawn()); //танк игрока
 	auto ControlledTank = Cast<ATank>(GetPawn()); //танк под контролем ИИ
 	
-	if (PlayerTank) 
+	if (ensure(PlayerTank)) 
 	{
 		//Move toward the player
 		MoveToActor(PlayerTank, 300);

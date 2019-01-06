@@ -4,6 +4,7 @@
 #include "TankBarrel.h"
 #include "Turret.h"
 #include "Runtime/Engine/Classes/Engine/World.h"
+#include "Tank.h"
 
 // Sets default values for this component's properties
 UTankAimingComponent::UTankAimingComponent()
@@ -36,12 +37,12 @@ void UTankAimingComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 }
 void UTankAimingComponent::AimAt(FVector HitLocation,float LaunchSpeed) 
 {
-	if (!Barrel)
+	
+	if (!ensure(Barrel))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Barrel was not found"));
 		return;
 	}
-	
 	FVector StartLocation = Barrel->GetSocketLocation(FName("ProjectileSpawnLocation"));//позиция сокета на конце пушки
 	
 	bool bHaveAimSolution = UGameplayStatics::SuggestProjectileVelocity(
@@ -59,7 +60,7 @@ void UTankAimingComponent::AimAt(FVector HitLocation,float LaunchSpeed)
 		false
 
 	);
-	//TArray<AActor*>()
+	
 	if (bHaveAimSolution) 
 	{
 	auto AimDirection = OutLaunchVelocity.GetSafeNormal();
@@ -72,19 +73,25 @@ void UTankAimingComponent::AimAt(FVector HitLocation,float LaunchSpeed)
 		auto Time = GetWorld()->GetTimeSeconds();
 		UE_LOG(LogTemp, Warning, TEXT("%f: Solution was NOT found"), Time)
 	}
-
+	
 }
 
-void UTankAimingComponent::SetBarrelReference(UTankBarrel * BarrelToSet)
+
+void UTankAimingComponent::Initialise(UTankBarrel* BarrelToSet, UTurret* TurretToSet)
 {
+	if (!ensure(BarrelToSet && TurretToSet)) { 
+		
+		return; }
 	Barrel = BarrelToSet;
-}
-void UTankAimingComponent::SetTurretReference(UTurret * TurretToSet)
-{
 	Turret = TurretToSet;
+	Cast<ATank>(GetOwner())->Barrel = BarrelToSet;
+	
+	
+
 }
 void UTankAimingComponent::MoveBarrelTowards(FVector AimDirection)// поднимаем/опускаем ствол пушки
 {
+	if (!ensure(Barrel) || !ensure(Turret)) {return;}
 	auto BarrelRotator = Barrel->GetForwardVector().Rotation();//куда смотрит пушка
 	auto AimAsRotator = AimDirection.Rotation();//куда мы хотим попасть после выстрела
 	auto DeltaRotator = AimAsRotator - BarrelRotator;//разница, которую передаём в метод Elevate (-1 или +1 после Clamp)

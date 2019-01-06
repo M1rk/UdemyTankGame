@@ -3,7 +3,7 @@
 #pragma once
 
 #include "Tank.h"
-#include "TankAimingComponent.h"
+
 #include "CoreMinimal.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/World.h"
@@ -13,12 +13,11 @@
 /**
  * 
  */
+class UTankAimingComponent;
 UCLASS()
 class TANKGAME_API ATankPlayerController : public APlayerController
 {
 	GENERATED_BODY()
-
-	ATank* GetControlledTank();
 	virtual void BeginPlay() override;
 	void Tick(float DeltaTime) override;
 private:
@@ -30,4 +29,9 @@ private:
 	float CrossHairXLocation = 0.5f;
 	UPROPERTY(EditAnywhere)
 	float CrossHairYLocation = 0.3333f;
+protected:
+	UFUNCTION(BlueprintImplementableEvent, Category = "Setup")
+	void FoundAimingComponent(UTankAimingComponent* AimCompRef);
+	UFUNCTION(BlueprintCallable,Category = "Setup")
+	ATank* GetControlledTank();
 };
