@@ -4,7 +4,7 @@
 #include "TankBarrel.h"
 #include "Turret.h"
 #include "Runtime/Engine/Classes/Engine/World.h"
-#include "Tank.h"
+#include "Projectile.h"
 
 // Sets default values for this component's properties
 UTankAimingComponent::UTankAimingComponent()
@@ -35,7 +35,7 @@ void UTankAimingComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 
 	// ...
 }
-void UTankAimingComponent::AimAt(FVector HitLocation,float LaunchSpeed) 
+void UTankAimingComponent::AimAt(FVector HitLocation) 
 {
 	
 	if (!ensure(Barrel))
@@ -84,7 +84,7 @@ void UTankAimingComponent::Initialise(UTankBarrel* BarrelToSet, UTurret* TurretT
 		return; }
 	Barrel = BarrelToSet;
 	Turret = TurretToSet;
-	Cast<ATank>(GetOwner())->Barrel = BarrelToSet;
+	
 	
 	
 
@@ -106,4 +106,20 @@ void UTankAimingComponent::MoveTurretTowards(FVector AimDirection) //вращаем баш
 	auto AimAsRotator = AimDirection.Rotation(); //куда мы хотим попасть после выстрела
 	auto DeltaRotator = AimAsRotator - BarrelRotator; //разница, которую передаём в метод Turn (-1 или +1 после Clamp)
 	Turret->Turn(DeltaRotator.Yaw);
+}
+void UTankAimingComponent::Fire() 
+{
+	if (!ensure(Barrel&&ProjectileBluePrint)) { return; }
+	bool isReloaded = (FPlatformTime::Seconds() - LastFireTime) > ReloadTimeInSeconds; //текущее время с начала игры минус время последнего выстрела
+																					   //сравниваем со временем перезарядки
+	if (isReloaded)
+	{
+		auto Projectile = GetWorld()->SpawnActor<AProjectile>(
+			ProjectileBluePrint,
+			Barrel->GetSocketLocation(FName("Projectile")),
+			Barrel->GetSocketRotation(FName("Projectile")));
+		Projectile->LaunchProjectile(10000);
+		LastFireTime = FPlatformTime::Seconds();
+
+	}
 }

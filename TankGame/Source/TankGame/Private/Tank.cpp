@@ -19,7 +19,7 @@ ATank::ATank()
 void ATank::BeginPlay()
 {
 	Super::BeginPlay();
-	TankAimingComponent = FindComponentByClass<UTankAimingComponent>();
+	
 }
 
 // Called every frame
@@ -33,36 +33,7 @@ void ATank::Tick(float DeltaTime)
 void ATank::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	InputComponent->BindAction("Fire", IE_Pressed, this, &ATank::Fire);
-}
-
-void ATank::AimAt(FVector HitLocation) 
-{
-	if (!ensure(TankAimingComponent)) { return; }
-	if (TankAimingComponent) 
-	{
-		TankAimingComponent->AimAt(HitLocation,LaunchSpeed);
-	}
 	
-	
-}
-
-
-void ATank::Fire() 
-{
-	if (!ensure(Barrel)) { return; }
-	bool isReloaded = (FPlatformTime::Seconds() - LastFireTime) > ReloadTimeInSeconds; //текущее время с начала игры минус время последнего выстрела
-																					  //сравниваем со временем перезарядки
-	if (isReloaded)														   
-	{
-	auto Projectile = GetWorld()->SpawnActor<AProjectile>(
-		ProjectileBluePrint,
-		Barrel->GetSocketLocation(FName("Projectile")),
-		Barrel->GetSocketRotation(FName("Projectile")));
-	    Projectile->LaunchProjectile(LaunchSpeed);
-		LastFireTime = FPlatformTime::Seconds();
-	
-	}
 }
 
 

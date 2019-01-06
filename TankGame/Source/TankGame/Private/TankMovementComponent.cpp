@@ -55,12 +55,12 @@ void UTankMovementComponent::RequestDirectMove(const FVector& MoveVelocity, bool
 	FRotator TankRotation = GetOwner()->GetActorRotation();
 	FRotator MoveVelocityRotation = MoveVelocity.ToOrientationRotator();
 	auto RotationDifferenceYaw = FMath::Clamp((MoveVelocityRotation - TankRotation).Yaw, -1.0f, 1.0f);
-	auto RotationChangeYaw = RotationDifferenceYaw * 30 * GetWorld()->DeltaTimeSeconds;
+	auto RotationChangeYaw = RotationDifferenceYaw * 5 * GetWorld()->DeltaTimeSeconds;
 	auto RawNewRotationYaw = GetOwner()->GetActorRotation().Yaw + RotationChangeYaw;
 	GetOwner()->SetActorRotation(FRotator(TankRotation.Pitch, RawNewRotationYaw, TankRotation.Roll));
 	 //моя версия решения проблемы поворота. в курсе предлагается использовать CrossProduct + методы IntendTurnRight/Left
 
 	
-	//IntendMoveForward(dotproduct);
+	IntendMoveForward(dotproduct);
 	
 }

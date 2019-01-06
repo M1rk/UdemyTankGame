@@ -9,9 +9,9 @@
 void ATankPlayerController::BeginPlay() 
 {
 	Super::BeginPlay();
-	auto AimingComponent = GetControlledTank()->FindComponentByClass<UTankAimingComponent>();
-	if (!ensure(AimingComponent)) { return; }
 	
+	auto AimingComponent = GetPawn()->FindComponentByClass<UTankAimingComponent>();
+	if (!ensure(AimingComponent)) { return; }
 	FoundAimingComponent(AimingComponent);
 	
 	
@@ -23,22 +23,17 @@ void ATankPlayerController::Tick(float DeltaTime)
 }
 
 
-ATank* ATankPlayerController::GetControlledTank()
-{
-	return Cast<ATank>(GetPawn());
-}
+
 
 
 void ATankPlayerController::AimTowardsCrosshair()
 {
-	if (!ensure(GetControlledTank()))
-	{
-		return;
-	}
+	auto AimingComponent = GetPawn()->FindComponentByClass<UTankAimingComponent>();
+	if (!ensure(AimingComponent)) { return; }
 	FVector HitLocation;
 	if (GetSightRayHitLocation(HitLocation))
 	{
-		GetControlledTank()->AimAt(HitLocation);
+		AimingComponent->AimAt(HitLocation);
 	}
 
 	
@@ -80,7 +75,7 @@ bool ATankPlayerController::GetLookDirection(FVector2D ScreenLocation, FVector &
 FHitResult ATankPlayerController::GetLookVectorHitLocation(FVector CameraWorldLocation,FVector LookDirection) 
 {
 		FHitResult HitResult(ForceInit);
-		FCollisionQueryParams Params= FCollisionQueryParams(FName(TEXT("AimRay")), true, GetControlledTank()); //GetControlledTank ползволяет игнорить танк при прицеливании
+		FCollisionQueryParams Params= FCollisionQueryParams(FName(TEXT("AimRay")), true, GetPawn()); //GetPawn() позволяет игнорировать свой танк при прицеливании
 		//Params.AddIgnoredActor(GetControlledTank());  //так тоже можно игнорировать
 		GetWorld()->LineTraceSingleByChannel(HitResult, CameraWorldLocation, CameraWorldLocation + LookDirection * 150000, ECC_Visibility, Params);
 		return HitResult;

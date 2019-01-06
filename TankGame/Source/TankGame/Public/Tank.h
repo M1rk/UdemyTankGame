@@ -1,12 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
-#include "TankAimingComponent.h"
+
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "Tank.generated.h"
 
-class AProjectile;
 UCLASS()
 class TANKGAME_API ATank : public APawn
 {
@@ -15,21 +14,15 @@ class TANKGAME_API ATank : public APawn
 public:
 	// Sets default values for this pawn's properties
 	ATank();
-	void AimAt(FVector HitLocation);
 	
-	UFUNCTION(BlueprintCallable, Category = Setup)
-	void Fire();
-	UPROPERTY(EditAnywhere,Category = Setup)
-	TSubclassOf<AProjectile> ProjectileBluePrint;
-	UTankBarrel* Barrel = nullptr;
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:	
 
-	UPROPERTY(BlueprintReadWrite)
-	UTankAimingComponent* TankAimingComponent = nullptr;
+	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -37,10 +30,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 private:
-	UPROPERTY(EditAnywhere, Category = Firing)
-	float LaunchSpeed = 4000; 
-	float ReloadTimeInSeconds = 3.0;
-	double LastFireTime = 0;
+
 
 	
 };

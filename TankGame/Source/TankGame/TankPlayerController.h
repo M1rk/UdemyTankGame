@@ -2,10 +2,7 @@
 
 #pragma once
 
-#include "Tank.h"
-
 #include "CoreMinimal.h"
-#include "DrawDebugHelpers.h"
 #include "Engine/World.h"
 #include "GameFramework/PlayerController.h"
 #include "TankPlayerController.generated.h"
@@ -32,6 +29,5 @@ private:
 protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Setup")
 	void FoundAimingComponent(UTankAimingComponent* AimCompRef);
-	UFUNCTION(BlueprintCallable,Category = "Setup")
-	ATank* GetControlledTank();
+	
 };
