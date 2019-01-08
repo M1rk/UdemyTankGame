@@ -56,7 +56,9 @@ private:
 	UTurret* Turret = nullptr;
 	void MoveBarrelTowards(FVector AimDirection);
 	void MoveTurretTowards(FVector AimDirection);
+	bool isBarrelMoving();
 	TArray<AActor*>ArrayToIgnore;
-	float ReloadTimeInSeconds = 1.5f;
+	float ReloadTimeInSeconds = 3.0f;
 	double LastFireTime = 0;
+	FVector AimDirection;
 };

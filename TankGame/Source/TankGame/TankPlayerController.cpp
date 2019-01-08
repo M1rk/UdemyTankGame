@@ -28,9 +28,14 @@ void ATankPlayerController::Tick(float DeltaTime)
 
 void ATankPlayerController::AimTowardsCrosshair()
 {
+	if (!GetPawn()) 
+	{
+		return;
+	}
 	auto AimingComponent = GetPawn()->FindComponentByClass<UTankAimingComponent>();
 	if (!ensure(AimingComponent)) { return; }
 	FVector HitLocation;
+	UE_LOG(LogTemp, Warning, TEXT("Hit? ->> %i"), GetSightRayHitLocation(HitLocation));
 	if (GetSightRayHitLocation(HitLocation))
 	{
 		AimingComponent->AimAt(HitLocation);
@@ -58,13 +63,18 @@ bool ATankPlayerController::GetSightRayHitLocation(OUT FVector &HitLocation)
 		if (HitResult.Actor!=nullptr) 
 		{
 		HitLocation = HitResult.Location;
+		return true;
 		//UE_LOG(LogTemp,Warning,TEXT("Hit Coordinates: %s"),*HitResult.Location.ToString());
 	 	//UE_LOG(LogTemp, Warning, TEXT("Hit Distance: %f"), HitResult.Distance);
 	 	//UE_LOG(LogTemp, Warning, TEXT("Hit object: %s"), *Cast<AActor>(HitResult.Actor)->GetName());
 		}
+		else 
+		{
+			return false;
+		}
 		
 	}
-	return true;
+	return false;
 }
 bool ATankPlayerController::GetLookDirection(FVector2D ScreenLocation, FVector & LookDirection, FVector &CameraWorldLocation)
 {

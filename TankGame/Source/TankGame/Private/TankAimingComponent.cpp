@@ -32,9 +32,17 @@ void UTankAimingComponent::BeginPlay()
 void UTankAimingComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	if(FPlatformTime::Seconds() - LastFireTime > ReloadTimeInSeconds)
+	if(FPlatformTime::Seconds() - LastFireTime < ReloadTimeInSeconds)
 	{
-		Firingstate = EFiringState::Locked;
+		Firingstate = EFiringState::Reloading; // Red
+	}
+	else if(isBarrelMoving())
+	{
+		Firingstate = EFiringState::Aiming;  //Orange
+	}
+	else
+	{
+		Firingstate = EFiringState::Locked; //Green
 	}
 	// ...
 }
@@ -66,7 +74,7 @@ void UTankAimingComponent::AimAt(FVector HitLocation)
 	
 	if (bHaveAimSolution) 
 	{
-	auto AimDirection = OutLaunchVelocity.GetSafeNormal();
+	AimDirection = OutLaunchVelocity.GetSafeNormal();
 	MoveBarrelTowards(AimDirection); //двигаем пушку по вертикали так, чтобы при выстреле с заданными параметрами снаряд попал туда, куда указывает прицел
 	MoveTurretTowards(AimDirection);//двигаем башню по горизонтали так, чтобы при выстреле с заданными параметрами снаряд попал туда, куда указывает прицел
 	
@@ -82,9 +90,10 @@ void UTankAimingComponent::AimAt(FVector HitLocation)
 
 void UTankAimingComponent::Initialise(UTankBarrel* BarrelToSet, UTurret* TurretToSet)
 {
-	if (!ensure(BarrelToSet && TurretToSet)) { 
-		
-		return; }
+	if (!ensure(BarrelToSet && TurretToSet)) 
+	{ 
+		return; 
+	}
 	Barrel = BarrelToSet;
 	Turret = TurretToSet;
 	
@@ -108,7 +117,14 @@ void UTankAimingComponent::MoveTurretTowards(FVector AimDirection) //вращаем баш
 	auto BarrelRotator = Barrel->GetForwardVector().Rotation(); //куда смотрит пушка
 	auto AimAsRotator = AimDirection.Rotation(); //куда мы хотим попасть после выстрела
 	auto DeltaRotator = AimAsRotator - BarrelRotator; //разница, которую передаём в метод Turn (-1 или +1 после Clamp)
-	Turret->Turn(DeltaRotator.Yaw);
+	if (FMath::Abs(DeltaRotator.Yaw)< 180)
+	{
+		Turret->Turn(DeltaRotator.Yaw);
+	}
+	else
+	{
+	Turret->Turn(-DeltaRotator.Yaw);
+	}
 }
 void UTankAimingComponent::Fire() 
 {
@@ -123,7 +139,24 @@ void UTankAimingComponent::Fire()
 			Barrel->GetSocketRotation(FName("Projectile")));
 		Projectile->LaunchProjectile(LaunchSpeed);
 		LastFireTime = FPlatformTime::Seconds();
-		Firingstate = EFiringState::Reloading;
+	
 
+	}
+}
+bool UTankAimingComponent::isBarrelMoving()
+{
+	if (!ensure(Barrel)) 
+	{
+		return false;
+	}
+	bool YawMoving = FMath::IsNearlyEqual(Barrel->GetForwardVector().ToOrientationRotator().Yaw, AimDirection.ToOrientationRotator().Yaw, 0.2f);
+	bool PitchMoving = FMath::IsNearlyEqual(Barrel->GetForwardVector().ToOrientationRotator().Pitch, AimDirection.ToOrientationRotator().Pitch,0.2f);
+	if (YawMoving && PitchMoving)
+	{
+		return false;
+	}
+	else
+	{
+		return true;
 	}
 }

@@ -16,9 +16,19 @@ class TANKGAME_API UTankTrack : public UStaticMeshComponent
 	
 	
 public:
+	virtual void BeginPlay() override;
+	
 	UFUNCTION(BlueprintCallable,Category = Input)
 	void SetThrottle(float Throttle);
 	//max force per track,in Newtons
 	UPROPERTY(EditDefaultsOnly)
 	float TrackMaxDriveForce = 400000; //assume tank of 40.000 kg, 1g acceleration
+private:
+	UTankTrack();
+	void ApplySidewaysForce();
+	void DriveTrack();
+	UFUNCTION()
+	void OnHit(UPrimitiveComponent * HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse,
+			const FHitResult& Hit);
+	float CurrentThrottle = 0;
 };
