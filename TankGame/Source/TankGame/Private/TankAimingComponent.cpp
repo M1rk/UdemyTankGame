@@ -131,13 +131,14 @@ void UTankAimingComponent::Fire()
 	if (!ensure(Barrel&&ProjectileBluePrint)) { return; }
 	 //текущее время с начала игры минус время последнего выстрела
 	 //сравниваем со временем перезарядки
-	if (Firingstate != EFiringState::Reloading)
+	if (Firingstate != EFiringState::Reloading && AmmoCount>0)
 	{
 		auto Projectile = GetWorld()->SpawnActor<AProjectile>(
 			ProjectileBluePrint,
 			Barrel->GetSocketLocation(FName("Projectile")),
 			Barrel->GetSocketRotation(FName("Projectile")));
 		Projectile->LaunchProjectile(LaunchSpeed);
+		AmmoCount -= 1;
 		LastFireTime = FPlatformTime::Seconds();
 	
 
@@ -159,4 +160,8 @@ bool UTankAimingComponent::isBarrelMoving()
 	{
 		return true;
 	}
+}
+EFiringState UTankAimingComponent::GetFiringState()
+{
+	return Firingstate;
 }

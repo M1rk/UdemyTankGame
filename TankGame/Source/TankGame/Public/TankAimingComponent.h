@@ -45,20 +45,24 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite,Category = "Firing")
+	int32 AmmoCount = 10;
+	EFiringState GetFiringState();
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	EFiringState Firingstate = EFiringState::Locked;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Firing")
+	float ReloadTimeInSeconds = 2.0f;
+	UPROPERTY(EditAnywhere, Category = "Firing")
+	float LaunchSpeed = 50000;
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 private:
-	UPROPERTY(EditAnywhere, Category = Firing)
-	float LaunchSpeed = 50000;
 	UTankBarrel* Barrel = nullptr;
 	UTurret* Turret = nullptr;
 	void MoveBarrelTowards(FVector AimDirection);
 	void MoveTurretTowards(FVector AimDirection);
 	bool isBarrelMoving();
 	TArray<AActor*>ArrayToIgnore;
-	float ReloadTimeInSeconds = 3.0f;
 	double LastFireTime = 0;
 	FVector AimDirection;
 };

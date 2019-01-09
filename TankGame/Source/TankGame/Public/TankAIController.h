@@ -18,7 +18,9 @@ public:
 		void BeginPlay() override;
 		void Tick(float DeltaTime) override;
 private:
-		
-		
+
+protected:
+	UPROPERTY(EditAnywhere)
+	float AcceptanceRadius = 10000; //насколько близко будут подъезжать боты 
 	
 };
