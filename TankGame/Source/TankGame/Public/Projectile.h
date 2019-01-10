@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "Projectile.generated.h"
 class UProjectileMovementComponent;
+class UParticleSystemComponent;
+
 UCLASS()
 class TANKGAME_API AProjectile : public AActor
 {
@@ -14,7 +16,9 @@ class TANKGAME_API AProjectile : public AActor
 public:	
 	// Sets default values for this actor's properties
 	AProjectile();
-
+	UFUNCTION()
+	void OnHit(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse,
+		const FHitResult& Hit);
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -25,8 +29,16 @@ public:
 	void LaunchProjectile(float LaunchSpeed);
 
 
-private:
+	UPROPERTY(VisibleAnywhere,Category = "Components")
 	UProjectileMovementComponent* ProjectileMovement = nullptr;
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UStaticMeshComponent* CollisionMesh = nullptr;
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UParticleSystemComponent* LaunchBlast = nullptr;
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UParticleSystemComponent* ImpactBlast = nullptr;
+private:
+
 	
 	
 };
