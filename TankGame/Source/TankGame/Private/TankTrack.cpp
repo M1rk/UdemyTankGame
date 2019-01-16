@@ -2,11 +2,13 @@
 
 #include "TankTrack.h"
 #include "Runtime/Engine/Classes/Engine/World.h"
+#include "SprungWheel.h"
+#include "SpawnPoint.h"
 
 void UTankTrack::BeginPlay()
 {
 	Super::BeginPlay();
-	OnComponentHit.AddDynamic(this, &UTankTrack::OnHit);
+	
 }
 UTankTrack::UTankTrack() 
 {
@@ -15,30 +17,47 @@ UTankTrack::UTankTrack()
 
 void UTankTrack::SetThrottle(float Throttle) 
 {
-	CurrentThrottle =FMath::Clamp<float>((CurrentThrottle + Throttle), -1.0f, 1.0f);
+	
+	float CurrentThrottle =FMath::Clamp<float>(Throttle, -1.0f, 1.0f);
+	DriveTrack(CurrentThrottle);
 } 
-void  UTankTrack::OnHit(UPrimitiveComponent * HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse,
-	const FHitResult& Hit)
-{
-	DriveTrack();
-	ApplySidewaysForce();
-	CurrentThrottle = 0;
-}
-void UTankTrack::ApplySidewaysForce()
-{
-	auto DeltaTime = GetWorld()->GetDeltaSeconds();
-	auto SlippageSpeed = FVector::DotProduct(GetOwner()->GetActorRightVector(), GetComponentVelocity());
-	auto CorrectionAcceleration = -SlippageSpeed / DeltaTime * GetRightVector();
-	auto TankRoot = Cast<UStaticMeshComponent>(GetOwner()->GetRootComponent());
-	auto CorrectionForce = TankRoot->GetMass()*CorrectionAcceleration / 2;
-	TankRoot->AddForce(CorrectionForce);
 
-}
-void UTankTrack::DriveTrack() 
-{
-	auto ForceApplied = GetForwardVector() * CurrentThrottle * TrackMaxDriveForce;
-	auto ForceLocation = GetComponentLocation();
-	auto TankRoot = Cast<UPrimitiveComponent>(GetOwner()->GetRootComponent());
-	TankRoot->AddForceAtLocation(ForceApplied, ForceLocation);
 
+void UTankTrack::DriveTrack(float CurrentThrottle)
+{
+	
+	auto ForceApplied = CurrentThrottle * TrackMaxDriveForce;
+	auto Wheels = GetWheels();
+	auto ForcePerWheel = ForceApplied / Wheels.Num();
+	for (ASprungWheel* Wheel : Wheels) 
+	{
+		Wheel->AddDrivingForce(ForcePerWheel);
+		
+	}
+}
+
+TArray<ASprungWheel*> UTankTrack::GetWheels()
+{
+	TArray<ASprungWheel*> ResultArray;
+	TArray <USceneComponent*> Children;
+	GetChildrenComponents(true, Children);
+	for (USceneComponent* Child : Children)
+	{
+		//из всех child'ов выбираем только те, что имеют тип USpawnPoint
+		auto SpawnPointChild = Cast<USpawnPoint>(Child);
+		if (!SpawnPointChild)
+		{
+			continue;
+		}
+		//у каждого USpawnPoint'a берём Actor'a (ASprungWheel), который спавнится в его координатах
+		AActor* SpawnedChild = SpawnPointChild->GetSpawnedActor();
+		auto SprungWheel = Cast<ASprungWheel>(SpawnedChild);
+		if (!SprungWheel) 
+		{
+			continue;
+		}
+		//заносим в конечный массив
+		ResultArray.Add(SprungWheel);
+	}
+	return ResultArray;
 }

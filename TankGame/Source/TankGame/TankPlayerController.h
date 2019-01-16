@@ -20,6 +20,8 @@ class TANKGAME_API ATankPlayerController : public APlayerController
 private:
 	FHitResult GetLookVectorHitLocation(FVector CameraWorldLocation, FVector LookDirection);
 	void AimTowardsCrosshair();
+	UFUNCTION()
+	void OnDeath();
 	bool GetSightRayHitLocation(OUT FVector &HitLocation);
 	bool GetLookDirection(FVector2D ScreenLocation, FVector & WorldDirection, FVector &CameraWorldLocation);
 	UPROPERTY(EditAnywhere)
@@ -28,6 +30,7 @@ private:
 	float CrossHairYLocation = 0.3333f;
 protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Setup")
-	void FoundAimingComponent(UTankAimingComponent* AimCompRef);
+	void FoundAimingComponent(UTankAimingComponent* AimCompRef);//סמבûעטו, גûחûגאועסÿ ג ÁÏ?
+	virtual void SetPawn(APawn* InPawn) override;
 	
 };

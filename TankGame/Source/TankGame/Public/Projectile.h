@@ -7,6 +7,7 @@
 #include "Projectile.generated.h"
 class UProjectileMovementComponent;
 class UParticleSystemComponent;
+class URadialForceComponent;
 
 UCLASS()
 class TANKGAME_API AProjectile : public AActor
@@ -19,6 +20,9 @@ public:
 	UFUNCTION()
 	void OnHit(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse,
 		const FHitResult& Hit);
+	void OnTimerExpire();
+	UPROPERTY(EditAnywhere)
+	float DestroyDelay = 2.f;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -37,8 +41,11 @@ public:
 	UParticleSystemComponent* LaunchBlast = nullptr;
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	UParticleSystemComponent* ImpactBlast = nullptr;
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	URadialForceComponent* ExplosionForce = nullptr;
 private:
 
-	
+	UPROPERTY(EditDefaultsOnly,Category = "Setup")
+	float ProjectileDamage = 20.f;
 	
 };

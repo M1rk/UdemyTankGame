@@ -4,7 +4,7 @@
 
 #include "TankPlayerController.h"
 #include "TankAimingComponent.h"
-#include "string.h"
+#include "Tank.h"
 
 void ATankPlayerController::BeginPlay() 
 {
@@ -43,7 +43,20 @@ void ATankPlayerController::AimTowardsCrosshair()
 
 	
 }
-
+void ATankPlayerController::SetPawn(APawn* InPawn)
+{
+	Super::SetPawn(InPawn);
+	if (InPawn)
+	{
+		auto PossesedTank = Cast<ATank>(InPawn);
+		if (!ensure(PossesedTank)) { return; }
+		PossesedTank->OnTankDeath.AddUniqueDynamic(this, &ATankPlayerController::OnDeath);
+	}
+}
+void ATankPlayerController::OnDeath()
+{
+	StartSpectatingOnly();
+}
 
 
 bool ATankPlayerController::GetSightRayHitLocation(OUT FVector &HitLocation)
@@ -82,11 +95,12 @@ bool ATankPlayerController::GetLookDirection(FVector2D ScreenLocation, FVector &
 	DeprojectScreenPositionToWorld(ScreenLocation.X, ScreenLocation.Y, CameraWorldLocation, LookDirection);
 	return true;
 }
+
 FHitResult ATankPlayerController::GetLookVectorHitLocation(FVector CameraWorldLocation,FVector LookDirection) 
 {
 		FHitResult HitResult(ForceInit);
 		FCollisionQueryParams Params= FCollisionQueryParams(FName(TEXT("AimRay")), true,GetPawn()); //GetPawn() позволяет игнорировать свой танк при прицеливании
 		//Params.AddIgnoredActor(GetControlledTank());  //так тоже можно игнорировать
-		GetWorld()->LineTraceSingleByChannel(HitResult, CameraWorldLocation, CameraWorldLocation + LookDirection * 150000, ECC_Visibility, Params);
+		GetWorld()->LineTraceSingleByChannel(HitResult, CameraWorldLocation, CameraWorldLocation + LookDirection * 150000, ECC_Camera, Params);
 		return HitResult;
 }

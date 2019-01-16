@@ -4,6 +4,10 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Runtime/Engine/Classes/Particles/ParticleSystemComponent.h"
 #include "Runtime/Engine/Classes/Components/StaticMeshComponent.h"
+#include "Runtime/Engine/Classes/PhysicsEngine/RadialForceComponent.h"
+#include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
+#include "Runtime/Engine/Public/TimerManager.h"
+#include "Runtime/Engine/Classes/GameFramework/DamageType.h"
 
 // Sets default values
 AProjectile::AProjectile()
@@ -13,6 +17,8 @@ AProjectile::AProjectile()
 	CollisionMesh = CreateDefaultSubobject<UStaticMeshComponent>(FName("CollisionMesh"));
 	CollisionMesh->SetNotifyRigidBodyCollision(true);
 	CollisionMesh->SetVisibility(false);
+	ExplosionForce = CreateDefaultSubobject<URadialForceComponent>(FName("Explosion Force"));
+	ExplosionForce->AttachToComponent(CollisionMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	LaunchBlast = CreateDefaultSubobject<UParticleSystemComponent>(FName("LaunchBlast"));
 	LaunchBlast->AttachToComponent(CollisionMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 
@@ -50,8 +56,28 @@ void AProjectile::LaunchProjectile(float LaunchSpeed)
 void  AProjectile::OnHit(AActor* SelfActor, AActor* OtherActor,FVector NormalImpulse,
 	const FHitResult& Hit)
 {
-	UE_LOG(LogTemp,Warning,TEXT("Collide with %s at %s"),*OtherActor->GetName(),*Hit.ToString())
+	//UE_LOG(LogTemp,Warning,TEXT("Collide with %s at %s"),*OtherActor->GetName(),*Hit.ToString())
 	LaunchBlast->Deactivate();
-	//ImpactBlast->temp
+	ExplosionForce->FireImpulse();
 	ImpactBlast->Activate();
+	SetRootComponent(ImpactBlast);
+	CollisionMesh->DestroyComponent();
+	UGameplayStatics::ApplyRadialDamage //метод для нанесения урона от взрыва
+	(
+		this,
+		ProjectileDamage,
+		GetActorLocation(),
+		ExplosionForce->Radius,
+		UDamageType::StaticClass(),
+		TArray<AActor*>()
+	);
+
+	FTimerHandle TimerHandle;
+	
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AProjectile::OnTimerExpire, DestroyDelay, false);//таймер до уничтожения
+	
+}
+void AProjectile::OnTimerExpire()
+{
+	Destroy();
 }

@@ -6,6 +6,7 @@
 #include "GameFramework/Pawn.h"
 #include "Tank.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FTankDelegate);
 UCLASS()
 class TANKGAME_API ATank : public APawn
 {
@@ -21,8 +22,12 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
+	FTankDelegate OnTankDeath;
 
-	
+	UFUNCTION(BlueprintPure,Category = "Health")
+	float GetHealthProcentage() const;
+	//called when actor damage is dealt
+	virtual float TakeDamage(float DamageAmount,struct FDamageEvent const & DamageEvent,class AController * EventInstigator,AActor * DamageCauser) override;
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -30,7 +35,10 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 private:
-
+	UPROPERTY(EditAnywhere,Category = "Setup")
+	int32 StartingHealth = 100;
+	UPROPERTY(EditAnywhere, Category = "Health")
+		int32 CurrentHealth;
 
 	
 };

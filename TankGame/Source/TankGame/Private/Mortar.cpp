@@ -15,9 +15,24 @@ AMortar::AMortar()
 void AMortar::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	CurrentHealth = StartingHealth;
 }
-
+float AMortar::TakeDamage(float DamageAmount, struct FDamageEvent const & DamageEvent, class AController * EventInstigator, AActor * DamageCauser)
+{
+	int32 DamagePoints = FPlatformMath::RoundToInt(DamageAmount);
+	int32 DamageToApply = FMath::Clamp(DamagePoints, 0, CurrentHealth);
+	CurrentHealth -= DamageToApply;
+	//UE_LOG(LogTemp, Warning, TEXT("DamageAmount: %f,DamageToApply: %d,CurrentHealth = %d"), DamageAmount, DamageToApply, CurrentHealth)
+		if (CurrentHealth <= 0)
+		{
+		//	OnTankDeath.Broadcast();
+		}
+	return DamageToApply;
+}
+float AMortar::GetHealthProcentage() const
+{
+	return (float)CurrentHealth / (float)StartingHealth;
+}
 // Called every frame
 void AMortar::Tick(float DeltaTime)
 {

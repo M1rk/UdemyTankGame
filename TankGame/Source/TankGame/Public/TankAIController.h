@@ -15,8 +15,11 @@ class TANKGAME_API ATankAIController : public AAIController
 {
 	GENERATED_BODY()
 public:
+		virtual void SetPawn(APawn* InPawn) override;
 		void BeginPlay() override;
 		void Tick(float DeltaTime) override;
+		UFUNCTION()
+		void OnDeath();
 private:
 
 protected:
